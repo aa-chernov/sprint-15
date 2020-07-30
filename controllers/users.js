@@ -69,10 +69,10 @@ module.exports.createUser = (req, res, next) => {
         message: `Создан пользователь: ${name}`,
       }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new BadRequestError('Упс! Что-то не так...');
-      } else if (err.name === 'MongoError' && err.code === 15000) {
+      if (err.name === 'MongoError' && err.code === 15000) {
         throw new ConflictError('Пользователь уже существует');
+      } else if (err.name === 'ValidationError') {
+        throw new BadRequestError('Упс! Что-то не так...');
       } else {
         next(err);
       }
