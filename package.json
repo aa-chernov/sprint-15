@@ -1,6 +1,6 @@
 {
   "name": "sprint-15",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Подготовка и деплой бэкенда",
   "main": "app.js",
   "scripts": {
