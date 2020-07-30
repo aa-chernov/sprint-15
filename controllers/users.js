@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken');
 const NotFoundError = require('../errors/notFoundError');
 const BadRequestError = require('../errors/badRequestError');
 const UnauthorizedError = require('../errors/unauthorizedError');
+const ConflictError = require('../errors/conflictError');
+
 // eslint-disable-next-line import/no-dynamic-require
 const User = require(path.join('..', 'models', 'user'));
 const { NODE_ENV, JWT_SECRET } = process.env;
@@ -47,36 +49,34 @@ module.exports.createUser = (req, res, next) => {
     password,
   } = req.body;
 
-  if (!password || password.length < 8) {
-    throw new BadRequestError('Пароль должен быть длиннее 8 символов');
-  } else {
-    bcrypt.hash(password, 10)
-      .then((hash) => User.create({
+  bcrypt.hash(password, 10)
+    .then((hash) => User
+      .create({
         name,
         about,
         avatar,
         email,
         password: hash,
       }))
-      .then((user) => res
-        .send({
-          data: {
-            _id: user._id,
-            name: user.name,
-            avatar: user.avatar,
-            email: user.email,
-          },
-          message: `Создан пользователь: ${name}`,
-        }))
-      .catch((err) => {
-        if (err.name === 'ValidationError') {
-          throw new BadRequestError('Упс! Что-то не так...');
-        } else {
-          next(err);
-        }
-      })
-      .catch(next);
-  }
+    .then((user) => res
+      .send({
+        data: {
+          _id: user._id,
+          name: user.name,
+          avatar: user.avatar,
+          email: user.email,
+        },
+        message: `Создан пользователь: ${name}`,
+      }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        throw new BadRequestError('Упс! Что-то не так...');
+      } else if (err.name === 'MongoError' && err.code === 15000) {
+        throw new ConflictError('Пользователь уже существует');
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.getUsers = (req, res, next) => {
