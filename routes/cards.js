@@ -18,10 +18,11 @@ cardsRouter.route('/cards')
       }),
     }),
   }), createCard);
+
 cardsRouter.delete('/cards/:_id', auth,
   celebrate({
     params: Joi.object().keys({
-      cardId: Joi.string().length(24).hex(),
+      _id: Joi.string().length(24).hex(),
     }),
   }), deleteCard);
 
