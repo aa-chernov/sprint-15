@@ -21,12 +21,9 @@ module.exports.createCard = (req, res, next) => {
       .send({ data: card, message: `Создана карточка: ${name}` }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Упс! Что-то не так...');
-      } else {
-        next(err);
+        next(new BadRequestError('Упс! Что-то не так...'));
       }
-    })
-    .catch(next);
+    });
 };
 
 module.exports.deleteCard = (req, res, next) => {
@@ -34,9 +31,9 @@ module.exports.deleteCard = (req, res, next) => {
     // eslint-disable-next-line consistent-return
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Нет такой карточки');
+        next(new NotFoundError('Нет такой карточки'));
       } else if (card.owner.toString() !== req.user._id) {
-        throw new ForbiddenError('Вы не можете удалить эту карточку');
+        next(new ForbiddenError('Вы не можете удалить эту карточку'));
       } else {
         return Card.findByIdAndRemove(req.params._id)
           .then((cardForDel) => {

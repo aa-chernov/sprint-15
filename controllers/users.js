@@ -69,10 +69,10 @@ module.exports.createUser = (req, res, next) => {
         message: `Создан пользователь: ${name}`,
       }))
     .catch((err) => {
-      if (err.name === 'MongoError' && err.code === 15000) {
-        throw new ConflictError('Пользователь уже существует');
+      if (err.name === 'MongoError' && err.code === 11000) {
+        next(new ConflictError('Пользователь уже существует'));
       } else if (err.name === 'ValidationError') {
-        throw new BadRequestError('Упс! Что-то не так...');
+        next(new BadRequestError('Упс! Что-то не так...'));
       } else {
         next(err);
       }
@@ -90,7 +90,7 @@ module.exports.getUserById = (req, res, next) => {
   User.findById(req.params._id)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Нет пользователя с таким id');
+        next(new NotFoundError('Нет пользователя с таким id'));
       } else {
         res.send({ data: user });
       }
